@@ -25,11 +25,12 @@ Compile:
 
 Run the first instance (source):
 
-`$ java -jar target/infinispan-playground-embedded-migration.jar -c src/main/resources/infinispan.xml`
+`$ java -classpath target/infinispan-playground-embedded-migration.jar org.infinispan.playground.embeddedmigration.EmbeddedMigrationSource -c src/main/resources/infinispan.xml -b 127.0.0.1
+`
 
 Run the second instance (target):
 
-`$ java -jar target/infinispan-playground-embedded-migration.jar -c src/main/resources/infinispan.xml -p 11223 -f hotrod://127.0.0.1:11222`
+`$  java -classpath target/infinispan-playground-embedded-migration.jar org.infinispan.playground.embeddedmigration.EmbeddedMigrationTarget -c src/main/resources/infinispan.xml  -f hotrod://127.0.0.1:11222`
 
 Once the migration is complete the source instance can be terminated with Ctrl-C.
 
