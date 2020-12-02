@@ -24,11 +24,14 @@ Compile:
 `$ mvn clean package`
 
 Run the first instance (source):
+The following command will create a HotRod server that will expose the source Cache Manager to be sycnhronized.
+The HotRod Server endpoint will listen to the bind adress argument b and the port arguments.
 
-`$ java -classpath target/infinispan-playground-embedded-migration.jar org.infinispan.playground.embeddedmigration.EmbeddedMigrationSource -c src/main/resources/infinispan.xml -b 127.0.0.1
+`$ java -classpath target/infinispan-playground-embedded-migration.jar org.infinispan.playground.embeddedmigration.EmbeddedMigrationSource -c src/main/resources/infinispan.xml -b 127.0.0.1 -p 11222
 `
 
 Run the second instance (target):
+the following command will start the target instance, configure the Remote Cache Store from the Hot Rod Server listening to the f argument and synchronise the entries to the target Cache Manager cache.
 
 `$  java -classpath target/infinispan-playground-embedded-migration.jar org.infinispan.playground.embeddedmigration.EmbeddedMigrationTarget -c src/main/resources/infinispan.xml  -f hotrod://127.0.0.1:11222`
 
