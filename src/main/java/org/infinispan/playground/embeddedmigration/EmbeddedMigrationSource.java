@@ -3,6 +3,7 @@
  */
 package org.infinispan.playground.embeddedmigration;
 
+import java.util.Optional;
 import java.util.concurrent.locks.LockSupport;
 
 import org.apache.commons.cli.CommandLine;
@@ -12,19 +13,26 @@ import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.infinispan.Cache;
-import org.infinispan.commons.dataconversion.MediaType;
+import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
+import org.infinispan.configuration.cache.StoreConfiguration;
+import org.infinispan.configuration.cache.VersioningScheme;
 import org.infinispan.manager.DefaultCacheManager;
+import org.infinispan.persistence.remote.configuration.RemoteStoreConfiguration;
+import org.infinispan.persistence.remote.configuration.RemoteStoreConfigurationBuilder;
 import org.infinispan.server.hotrod.HotRodServer;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfiguration;
 import org.infinispan.server.hotrod.configuration.HotRodServerConfigurationBuilder;
+import org.infinispan.upgrade.RollingUpgradeManager;
+
 
 /**
  * @author Meissa
- * This class runs the Cache manager instance source, create the HotRod server that will expose the cache for future migration.
+ * This class create a Cache manager instance source, create the HotRod server that will expose the cache for future migration.
  */
 public class EmbeddedMigrationSource {
 	public static final Logger log = LogManager.getLogger(EmbeddedMigrationSource.class);
+
 
 	/**
 	 * @param args
@@ -39,14 +47,19 @@ public class EmbeddedMigrationSource {
 	      
 	   // Create a cache manager using the supplied configuration
 	      DefaultCacheManager cacheManager = new DefaultCacheManager(cmd.getOptionValue("c"));
+	      
 
 	      // Configure a cache
 	      ConfigurationBuilder builder = new ConfigurationBuilder();
-	      builder.encoding().mediaType(MediaType.APPLICATION_OBJECT_TYPE);
-	   
-	      // Create the cache(s)	      
-	      Cache<String, Object> cache = cacheManager.createCache("cache", builder.build());
-	      log.info("CREATING THE SOURCE CACHE",cache.getName());
+	      builder.versioning().enable().scheme(VersioningScheme.SIMPLE);
+	      builder.compatibility().enable();
+	      
+	   // Create the cache(s)
+	      cacheManager.defineConfiguration("cache", builder.build());
+	      cacheManager.defineConfiguration("cacheTwo", builder.build());
+	      
+	      Cache<String, Object> cache = cacheManager.getCache("cache");
+	      Cache<String, Object> cacheTwo = cacheManager.getCache("cacheTwo");
 
 	      // Create a Hot Rod server which exposes the cache manager for migration to a future instance
 	      HotRodServerConfiguration hotRodServerConfiguration = new HotRodServerConfigurationBuilder()
@@ -56,12 +69,17 @@ public class EmbeddedMigrationSource {
 	      HotRodServer server = new HotRodServer();
 	      server.start(hotRodServerConfiguration, cacheManager);
 	      log.info("Listening on hotrod://{}:{}", hotRodServerConfiguration.host(), hotRodServerConfiguration.port());
-
+	      
+	      
 	   // We fill the cache with data
 	         for (int i = 0; i < 100; i++) {
 	            cache.put("k" + i, "v" + i);
 	         }
-	         log.info("Filled cache");
+	         
+	         for (int i = 0; i < 200; i++) {
+		            cacheTwo.put("k" + i, "v" + i);
+		         }
+	         log.info("Filled caches");
 	         
 	         try {
 	             // Wait until ctrl-c
@@ -72,6 +90,8 @@ public class EmbeddedMigrationSource {
 	             server.stop();
 	             cacheManager.stop();
 	          }
+	
+
 	}
 
 }
