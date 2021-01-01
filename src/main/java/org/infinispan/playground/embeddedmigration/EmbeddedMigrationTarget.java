@@ -56,7 +56,6 @@ public class EmbeddedMigrationTarget {
 	    	  String targetCacheName=cmd.getOptionValue("cc", "cache");
 	         HotRodURI uri = HotRodURI.create(cmd.getOptionValue("f"));
 	         RemoteStoreConfigurationBuilder store = builder.persistence().addStore(RemoteStoreConfigurationBuilder.class)
-	               //.remoteCacheName("cache")
 	               .remoteCacheName(targetCacheName)
 	               .hotRodWrapping(true).protocolVersion("2.5");
 	         uri.getAddresses().forEach(address -> store.addServer().host(address.getHostName()).port(address.getPort()));
