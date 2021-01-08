@@ -51,8 +51,7 @@ public class EmbeddedMigrationSource {
 
 	      // Configure a cache
 	      ConfigurationBuilder builder = new ConfigurationBuilder();
-	      builder.versioning().enable().scheme(VersioningScheme.SIMPLE);
-	      builder.compatibility().enable();
+	     
 	      
 	   // Create the cache(s)
 	      cacheManager.defineConfiguration("cache", builder.build());

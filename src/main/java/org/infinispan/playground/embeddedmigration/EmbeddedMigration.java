@@ -40,8 +40,8 @@ public class EmbeddedMigration {
 
       // Configure a cache
       ConfigurationBuilder builder = new ConfigurationBuilder();
-      builder.versioning().enable().scheme(VersioningScheme.SIMPLE);
-      builder.compatibility().enable();
+     // builder.versioning().enable().scheme(VersioningScheme.SIMPLE);
+     // builder.compatibility().enable();
 
       boolean doMigration = cmd.hasOption("f");
 
@@ -49,8 +49,8 @@ public class EmbeddedMigration {
       if (doMigration) {
          HotRodURI uri = HotRodURI.create(cmd.getOptionValue("f"));
          RemoteStoreConfigurationBuilder store = builder.persistence().addStore(RemoteStoreConfigurationBuilder.class)
-               .remoteCacheName("cache")
-               .hotRodWrapping(true).protocolVersion("2.5");
+               .remoteCacheName("cache");
+             //  .hotRodWrapping(true).protocolVersion("2.5");
          uri.getAddresses().forEach(address -> store.addServer().host(address.getHostName()).port(address.getPort()));
       }
 

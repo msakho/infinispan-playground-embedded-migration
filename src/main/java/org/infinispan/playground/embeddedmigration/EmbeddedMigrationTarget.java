@@ -13,6 +13,7 @@ import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.infinispan.Cache;
+import org.infinispan.client.hotrod.ProtocolVersion;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.StoreConfiguration;
@@ -46,8 +47,6 @@ public class EmbeddedMigrationTarget {
 
 	      // Configure a cache and enable compatibility versionning.
 	      ConfigurationBuilder builder = new ConfigurationBuilder();
-	      builder.versioning().enable().scheme(VersioningScheme.SIMPLE);
-	      builder.compatibility().enable();
 
 	      boolean doMigration = cmd.hasOption("f");
 	      
@@ -57,7 +56,11 @@ public class EmbeddedMigrationTarget {
 	         HotRodURI uri = HotRodURI.create(cmd.getOptionValue("f"));
 	         RemoteStoreConfigurationBuilder store = builder.persistence().addStore(RemoteStoreConfigurationBuilder.class)
 	               .remoteCacheName(targetCacheName)
-	               .hotRodWrapping(true).protocolVersion("2.5");
+	               .hotRodWrapping(true)
+	               .protocolVersion(ProtocolVersion.PROTOCOL_VERSION_25);
+	               
+	           
+	  
 	         uri.getAddresses().forEach(address -> store.addServer().host(address.getHostName()).port(address.getPort()));
 	         
 	      // Create the cache(s)
