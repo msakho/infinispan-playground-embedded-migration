@@ -4,6 +4,9 @@
 package org.infinispan.playground.embeddedmigration;
 
 import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.concurrent.locks.LockSupport;
 
 import org.apache.commons.cli.CommandLine;
@@ -13,15 +16,19 @@ import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.infinispan.Cache;
+import org.infinispan.CacheSet;
 import org.infinispan.client.hotrod.ProtocolVersion;
 import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.StoreConfiguration;
 import org.infinispan.configuration.cache.VersioningScheme;
+import org.infinispan.context.Flag;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.persistence.remote.configuration.RemoteStoreConfiguration;
 import org.infinispan.persistence.remote.configuration.RemoteStoreConfigurationBuilder;
 import org.infinispan.upgrade.RollingUpgradeManager;
+
+
 
 /**
  * @author Meissa
@@ -58,6 +65,7 @@ public class EmbeddedMigrationTarget {
 	               .remoteCacheName(targetCacheName)
 	               .hotRodWrapping(true)
 	               .protocolVersion(ProtocolVersion.PROTOCOL_VERSION_25);
+	         
 	               
 	           
 	  
@@ -66,7 +74,8 @@ public class EmbeddedMigrationTarget {
 	      // Create the cache(s)
 	        
 	         cacheManager.defineConfiguration(targetCacheName, builder.build());
-	         Cache<String, Object> cache = cacheManager.getCache(targetCacheName);
+	         Cache<String, String> cache = cacheManager.getCache(targetCacheName);
+	        // Cache<Integer, Integer> cache = cacheManager.getCache(targetCacheName);
 	         log.info("CREATING THE TARGET CACHE",cache.getName());
 	         
 	         for (String cacheName : cacheManager.getCacheNames()) {
@@ -82,6 +91,21 @@ public class EmbeddedMigrationTarget {
 	             log.info("Cache {}: Migrated {} entries", cacheName, count);
 	             upgrade.disconnectSource("hotrod");
 	             log.info("Cache {}: disconnected from source", cacheName);
+	             log.info("Cache migrated size="+cache.size());
+	             
+	             
+	             CacheSet<Entry<String, String>> entries = cache.getAdvancedCache().withFlags(Flag.SKIP_REMOTE_LOOKUP)
+	     				.entrySet();
+	             for (Entry<String, String> entry : entries) {
+					
+					String key = entry.getKey();
+					String value = entry.getValue();
+					
+					log.info("CACHE KEY="+key);
+					log.info("CACHE VALUE="+value);
+					
+					
+				}
 	         }
 	      }
 	      try {
